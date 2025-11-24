@@ -9,24 +9,17 @@ import { ModelFactory } from './models/ModelFactory';
 import { IGameSettings } from './games/base/SlotState';
 
 // --- GAME REGISTRY ---
-// Import specific game classes here. 
-// For dynamic loading in a real app, you might use require/import() 
-// based on directory structure, but for type safety, explicit is better.
 import { SlotSettings as CreatureSettings } from './games/CreatureFromTheBlackLagoonNET/SlotSettings';
 import { Server as CreatureServer } from './games/CreatureFromTheBlackLagoonNET/Server';
 
-// Map of GameID -> { SettingsClass, ServerClass }
 const GAME_REGISTRY: Record<string, any> = {
   'creature_from_the_black_lagoon': {
     settings: CreatureSettings,
     server: CreatureServer
   },
-  // Add other games here as they are converted
-  // 'starburst': { settings: StarburstSettings, server: StarburstServer },
 };
 
 // --- MOCK DATABASE ---
-// Simulates persistent storage for Users and Shops
 const MOCK_DB = {
   users: new Map<string, any>(),
   shops: new Map<number, any>(),
@@ -42,14 +35,11 @@ MOCK_DB.shops.set(1, {
   balance: 100000 // House bank
 });
 
-/**
- * Get or Create User in Mock DB
- */
 function getUser(userId: string): any {
   if (!MOCK_DB.users.has(userId)) {
     MOCK_DB.users.set(userId, {
       id: userId,
-      balance: 1000.00, // Starting Balance
+      balance: 1000.00,
       count_balance: 1000.00,
       shop_id: 1,
       session: '',
@@ -62,7 +52,7 @@ function getUser(userId: string): any {
 }
 
 /**
- * Main Request Handler
+ * Main Request Handler (Internal Logic)
  */
 export async function handleRequest(request: GameRequest): Promise<GameResponse | { error: string }> {
   try {
@@ -72,23 +62,20 @@ export async function handleRequest(request: GameRequest): Promise<GameResponse 
       return { error: `Game not found: ${gameId}` };
     }
 
-    // 1. Fetch Data (Simulate DB calls)
     const userData = getUser(userId);
     const shopData = MOCK_DB.shops.get(userData.shop_id);
     
-    // 2. Construct Game Settings (The "Context")
-    // This is where we inject the data required by BaseSlotSettings
     const gameSettings: IGameSettings = {
       user: userData,
       shop: shopData,
       game: {
-        id: 1, // Mock Game ID
+        id: 1,
         name: gameId,
         shop_id: shopData.id,
-        denomination: 1, // Default denom
+        denomination: 1,
         view: true,
       },
-      jpgs: [], // Mock Jackpots if needed
+      jpgs: [],
       balance: userData.balance,
       slotId: gameId,
       playerId: userId,
@@ -101,32 +88,18 @@ export async function handleRequest(request: GameRequest): Promise<GameResponse 
       }
     };
 
-    // 3. Instantiate Game Server
-    // The specific Server class handles the logic using the Settings
-    const GameServerClass = GAME_REGISTRY[gameId].server;
-    
-    // Note: Assuming Server constructor takes (settings) or similar.
-    // If Server.ts is just a logic container, we might instantiate Settings directly.
-    // Based on uploaded files, Server usually orchestrates.
-    // However, if Server.ts isn't fully standardized yet, we might fallback to direct logic.
-    
-    // ADJUSTMENT: We will instantiate the Settings class which extends BaseSlotSettings
-    // and use it to perform the logic, as the Server class in PHP ports is often just an API handler.
     const GameSettingsClass = GAME_REGISTRY[gameId].settings;
     const gameInstance = new GameSettingsClass(gameSettings);
 
     let response: any = {};
 
-    // 4. Execute Action
     switch (action) {
       case 'init':
-        // Logic to build init response
         response = {
             balance: gameInstance.GetBalance(),
             gameId: gameId,
             currency: shopData.currency,
             config: gameInstance.slotReelsConfig || {},
-            // Add other init data usually returned by Server.php
         };
         break;
 
@@ -138,33 +111,19 @@ export async function handleRequest(request: GameRequest): Promise<GameResponse 
 
       case 'spin':
         const spinReq = request as SpinRequest;
+        const spinResult = gameInstance.GetSpinSettings(spinReq.bet, spinReq.lines);
         
-        // Ensure balance update on the model
-        // In a real scenario, this would be handled inside GetSpinSettings or similar
-        
-        // 1. Calculate Bet
-        const totalBet = spinReq.bet; // Simplified
-        
-        // 2. Run Spin Logic
-        // Assuming GetSpinSettings or similar main entry point exists in the converted class
-        // If strict strict API isn't present, we might need to rely on the internal methods
-        const spinResult = gameInstance.GetSpinSettings(totalBet, spinReq.lines);
-        
-        // 3. Construct Response
         response = {
             balance: gameInstance.GetBalance(),
-            win: 0, // Need to extract from spinResult
-            reels: {}, // Need to extract
+            win: 0, // TODO: Extract actual win from spinResult
+            reels: {}, // TODO: Extract reel positions
             symbols: [],
             winLines: []
         };
         
-        // Persist User Balance back to Mock DB
-        // In strict mode, the model.save() would handle this if connected to a real DB
-        // Here we manually sync for the test runner
+        // Sync Mock DB
         userData.balance = gameInstance.user?.balance;
         MOCK_DB.users.set(userId, userData);
-        
         break;
 
       default:
@@ -177,4 +136,42 @@ export async function handleRequest(request: GameRequest): Promise<GameResponse 
     console.error(`System Error:`, error);
     return { error: error instanceof Error ? error.message : "Unknown error" };
   }
+}
+
+// --- SELF EXECUTION (HTTP SERVER) ---
+// Only runs if executed directly (e.g., bun run src/index.ts)
+if (import.meta.main) {
+  const PORT = 3000;
+  console.log(`🎰 Casino Game Server running on http://localhost:${PORT}`);
+  
+  Bun.serve({
+    port: PORT,
+    async fetch(req) {
+      // Handle CORS
+      if (req.method === "OPTIONS") {
+        return new Response(null, {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type"
+          }
+        });
+      }
+
+      if (req.method === "POST") {
+        try {
+          const body = await req.json();
+          const result = await handleRequest(body as GameRequest);
+          
+          return Response.json(result, {
+            headers: { "Access-Control-Allow-Origin": "*" }
+          });
+        } catch (e) {
+          return Response.json({ error: "Invalid JSON or Internal Error" }, { status: 400 });
+        }
+      }
+
+      return new Response("Casino Server Ready. Send POST to /", { status: 200 });
+    }
+  });
 }

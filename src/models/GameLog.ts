@@ -1,16 +1,12 @@
 /**
- * GameLog model for casino game logging system
- * 
- * Simple data container for game logging with mock database methods
- * providing backward compatibility with existing code.
- * 
- * @package Casino Game System
- * @version 1.0.0
+ * GameLog model for casino game logging system.
+ * Refactored for Strict Type Safety.
+ * * @package Casino Game System
+ * @version 1.1.0
  */
 
-/**
- * Interface for GameLog data structure
- */
+import { BaseModel } from './BaseModel';
+
 export interface GameLogData {
   id: number;
   game_id: number;
@@ -20,11 +16,7 @@ export interface GameLogData {
   shop_id: number;
 }
 
-/**
- * GameLog model class for tracking game events and user activities
- */
-export class GameLog {
-  // Core properties
+export class GameLog extends BaseModel<GameLogData> {
   public id: number;
   public game_id: number;
   public user_id: number;
@@ -32,60 +24,28 @@ export class GameLog {
   public str: string;
   public shop_id: number;
 
-  /**
-   * Constructor for GameLog model
-   * @param data Initial game log data
-   */
   constructor(data: Partial<GameLogData> = {}) {
-    // Initialize properties with defaults
-    this.id = data.id ?? 0;
-    this.game_id = data.game_id ?? 0;
-    this.user_id = data.user_id ?? 0;
-    this.ip = data.ip ?? '';
-    this.str = data.str ?? '';
-    this.shop_id = data.shop_id ?? 0;
+    const defaultData: GameLogData = {
+      id: 0,
+      game_id: 0,
+      user_id: 0,
+      ip: '',
+      str: '',
+      shop_id: 0
+    };
+
+    const logData: GameLogData = { ...defaultData, ...data };
+    super(logData);
+
+    this.id = logData.id;
+    this.game_id = logData.game_id;
+    this.user_id = logData.user_id;
+    this.ip = logData.ip;
+    this.str = logData.str;
+    this.shop_id = logData.shop_id;
   }
 
-  /**
-   * Mock database method for complex WHERE clauses (backward compatibility)
-   * @param query SQL-like query string
-   * @param bindings Query parameter bindings
-   * @returns New GameLog instance with filtered data
-   */
-  static whereRaw(query: string, bindings: any[] = []): GameLog {
-    // Simple mock implementation for backward compatibility
-    // Extract game_id and user_id from typical query patterns
-    const gameId = bindings[0] ?? 0;
-    const userId = bindings[1] ?? 0;
-    
-    return new GameLog({
-      game_id: gameId,
-      user_id: userId
-    });
-  }
-
-  /**
-   * Mock database method to get results (backward compatibility)
-   * @returns Array containing this instance
-   */
-  get(): GameLog[] {
-    return [this];
-  }
-
-  /**
-   * Static method to create new GameLog instance (backward compatibility)
-   * @param data Game log data
-   * @returns New GameLog instance
-   */
-  static create(data: GameLogData): GameLog {
-    return new GameLog(data);
-  }
-
-  /**
-   * Convert model to array format for serialization
-   * @returns Object with all properties
-   */
-  toArray(): GameLogData {
+  getState(): GameLogData {
     return {
       id: this.id,
       game_id: this.game_id,
@@ -96,18 +56,28 @@ export class GameLog {
     };
   }
 
-  /**
-   * Get log entry details for debugging
-   * @returns Formatted log entry string
-   */
-  getLogDetails(): string {
-    return `GameLog[ID:${this.id}] Game:${this.game_id} User:${this.user_id} IP:${this.ip} Shop:${this.shop_id}`;
+  static whereRaw(query: string, bindings: any[] = []): GameLog {
+    const gameId = typeof bindings[0] === 'number' ? bindings[0] : 0;
+    const userId = typeof bindings[1] === 'number' ? bindings[1] : 0;
+    
+    return new GameLog({
+      game_id: gameId,
+      user_id: userId
+    });
   }
 
-  /**
-   * Check if this is a valid log entry
-   * @returns true if entry has minimum required data
-   */
+  get(): GameLog[] {
+    return [this];
+  }
+
+  static create(data: Partial<GameLogData>): GameLog {
+    return new GameLog(data);
+  }
+
+  toArray(): GameLogData {
+    return this.getState();
+  }
+
   isValid(): boolean {
     return this.game_id > 0 && this.user_id > 0;
   }

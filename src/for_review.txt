@@ -1,0 +1,142 @@
+
+🚀 STARTING TEST FOR: GoldenGrimoireNET
+==================================================
+{
+  id: 1,
+  name: "GoldenGrimoireNET",
+  bet: "0.1,0.2,0.5,1,2,5,10",
+  lines_percent_config_spin: "{\"line10\":{\"74_80\":100}}",
+  lines_percent_config_bonus: "{\"line10\":{\"74_80\":100}}",
+}
+🔹 Instantiating SlotSettings...
+{
+  originalData: {
+    id: 1,
+    name: "GoldenGrimoireNET",
+    bet: "0.1,0.2,0.5,1,2,5,10",
+    lines_percent_config_spin: "{\"line10\":{\"74_80\":100}}",
+    lines_percent_config_bonus: "{\"line10\":{\"74_80\":100}}",
+  },
+  changedData: {},
+  isModified: false,
+  id: 1,
+  name: "GoldenGrimoireNET",
+  shop_id: 0,
+  stat_in: 0,
+  stat_out: 0,
+  bids: 0,
+  denomination: 1,
+  slotViewState: "",
+  bet: "0.1,0.2,0.5,1,2,5,10",
+  jp_config: {
+    lines_percent_config: {
+      spin: [Object ...],
+      bonus: [Object ...],
+    },
+  },
+  rezerv: 100,
+  view: true,
+  advanced: "",
+  lines_percent_config_spin: "{\"line10\":{\"74_80\":100}}",
+  lines_percent_config_spin_bonus: "",
+  lines_percent_config_bonus: "{\"line10\":{\"74_80\":100}}",
+  lines_percent_config_bonus_bonus: "",
+  shortNames: [ "Low", "Medium", "High" ],
+  linesPercentConfigs: {
+    spin: {
+      line10: [Object ...],
+    },
+    bonus: {
+      line10: [Object ...],
+    },
+  },
+}
+Game {
+  originalData: {
+    id: 1,
+    name: "GoldenGrimoireNET",
+    bet: "0.1,0.2,0.5,1,2,5,10",
+    lines_percent_config_spin: "{\"line10\":{\"74_80\":100}}",
+    lines_percent_config_bonus: "{\"line10\":{\"74_80\":100}}",
+  },
+  changedData: {},
+  isModified: false,
+  id: 1,
+  name: "GoldenGrimoireNET",
+  shop_id: 0,
+  stat_in: 0,
+  stat_out: 0,
+  bids: 0,
+  denomination: 1,
+  slotViewState: "",
+  bet: "0.1,0.2,0.5,1,2,5,10",
+  jp_config: {
+    lines_percent_config: {
+      spin: [Object ...],
+      bonus: [Object ...],
+    },
+  },
+  rezerv: 100,
+  view: true,
+  advanced: "",
+  lines_percent_config_spin: "{\"line10\":{\"74_80\":100}}",
+  lines_percent_config_spin_bonus: "",
+  lines_percent_config_bonus: "{\"line10\":{\"74_80\":100}}",
+  lines_percent_config_bonus_bonus: "",
+  shortNames: [ "Low", "Medium", "High" ],
+  linesPercentConfigs: {
+    spin: {
+      line10: [Object ...],
+    },
+    bonus: {
+      line10: [Object ...],
+    },
+  },
+  get_values: [Function: get_values],
+  setLinesPercentConfigs: [Function: setLinesPercentConfigs],
+  get_line_value: [Function: get_line_value],
+  get_lines_percent_config: [Function: get_lines_percent_config],
+  get_gamebank: [Function: get_gamebank],
+  setGameBank: [Function: setGameBank],
+  refresh: [Function: refresh],
+  getState: [Function: getState],
+  increment: [Function: increment],
+  hasChanges: [Function: hasChanges],
+  getChanges: [Function: getChanges],
+  save: [Function: save],
+  reset: [Function: reset],
+  update: [Function: update],
+  getOriginalData: [Function: getOriginalData],
+  isFieldChanged: [Function: isFieldChanged],
+  getOriginalValue: [Function: getOriginalValue],
+  clearChanges: [Function: clearChanges],
+  offsetGet: [Function: offsetGet],
+  offsetSet: [Function: offsetSet],
+  offsetExists: [Function: offsetExists],
+  offsetUnset: [Function: offsetUnset],
+  getChangedFieldCount: [Function: getChangedFieldCount],
+  getChangedFieldNames: [Function: getChangedFieldNames],
+}
+✅ SlotSettings instantiated.
+🔹 Instantiating Server...
+✅ Server instantiated.
+
+🔸 TESTING ACTION: [init]
+--------------------------------------------------
+✅ PASS: Valid response received.
+Length: 6658 chars
+Snippet: bl.i32.reelset=ALL&rs.i1.r.i0.syms=SYM3%2CSYM3%2CSYM3%2CSYM3&bl.i6.coins=0&bl.i17.reelset=ALL&bl.i15...
+✅ PASS: State object present.
+
+🔸 TESTING ACTION: [paytable]
+--------------------------------------------------
+✅ PASS: Valid response received.
+Length: 10139 chars
+Snippet: pt.i0.comp.i19.symbol=SYM9&bl.i6.coins=1&bl.i17.reelset=ALL&pt.i0.comp.i15.type=betline&pt.i0.comp.i...
+✅ PASS: State object present.
+
+🔸 TESTING ACTION: [spin]
+--------------------------------------------------
+
+==================================================
+🏁 TEST SEQUENCE COMPLETE

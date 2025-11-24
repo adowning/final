@@ -20,31 +20,35 @@ export interface ShopData {
   percent: number;
   is_blocked: boolean;
   currency: string;
+  balance: number;
 }
 
 /**
  * Shop model class with change tracking and ArrayAccess compatibility
  */
 export class Shop extends BaseModel<ShopData> {
+
   // Shop properties
   public id: string | number;
   public max_win: number;
   public percent: number;
   public is_blocked: boolean;
   public currency: string;
+  public balance: number;
 
   /**
    * Constructor for Shop model
    * @param data Initial shop data
    */
-  constructor(data: Partial<ShopData> = {}) {
+  constructor(data: ShopData) {
     // Initialize default data structure
     const defaultData: ShopData = {
       id: 0,
       max_win: 1000.0,
       percent: 10.0,
       is_blocked: false,
-      currency: 'USD'
+      currency: 'USD',
+      balance: 1000
     };
 
     // Merge provided data with defaults
@@ -61,6 +65,7 @@ export class Shop extends BaseModel<ShopData> {
     this.percent = shopData.percent;
     this.is_blocked = shopData.is_blocked;
     this.currency = shopData.currency;
+    this.balance = shopData.balance;
   }
 
   /**
@@ -73,14 +78,12 @@ export class Shop extends BaseModel<ShopData> {
       max_win: this.max_win,
       percent: this.percent,
       is_blocked: this.is_blocked,
-      currency: this.currency
+      currency: this.currency,
+      balance: this.balance
     };
   }
 
-  /**
-   * Check if the shop is blocked
-   * @returns true if shop is blocked, false otherwise
-   */
+
   isBlocked(): boolean {
     return this.is_blocked;
   }

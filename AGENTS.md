@@ -83,27 +83,6 @@ return JSON.stringify({
 });
 ```
 
-## 3. ⚠️ Known Anomalies & Missing Data
-
-If you are converting these specific games, use the data below instead of searching for files.
-
-### 1. DazzleMeNET
-
-**Reels:** 5 reels with unique row counts (3-3-4-4-5).
-
-**Reel 1:** `[8,8,8,6,6,6,3,3,8,8,8,5,5,7,7,7,8,8,8,0,4,4,5,5,8,8,8,6,6,6,5,5,5,7,7,7,8,8,8,5,5,3,3,4,4,8,8,8,7,7,7,6,6,8,8,8,7,7,7,5,5,8,8,8,6,6,6,7,7,7,8,8,8,5,5,4,4,8,8,8,6,6,6,7,7,7,8,8,8,6,6,6,5,5,5,4,4,6,6,3,3,3,5,5,5,6,6,6,7,7,7,0,4,4,4,6,6,3,3,8,8,8,6,6,5,5,7,7,7,4,4,8,8,8,7,7,7,5,5,5,8,8,8,6,6,4,4,4,7,7,7,8,8,8,5,5,5,7,7,7,4,4,6,6,6,7,7,7,4,4,6,6,6,5,5,3,3,3,8,8,8,6,6,6,5,5,8,8,8,4,4,5,5,5,8,8,8,6,6,5,5,8,8,8,7,7,7,6,6,6,8,8,8,4,4,6,6,3,3,8,8,8,6,6,6]`
-
-**Note:** See provided reels.txt context for Reels 2-5 if needed.
-
-### 2. FortuneRangersNET
-
-**Reel 1:** `[8,8,8,6,6,6,3,3,8,8,8,5,5,7,7,7,8,8,8,0,4,4,5,5,8,8,8,6,6,6,5,5,5,7,7,7,8,8,8,5,5,3,3,4,4,8,8,8,7,7,7,6,6,8,8,8,7,7,7,5,5,8,8,8,6,6,6,7,7,7,8,8,8,5,5,4,4,8,8,8,6,6,6,7,7,7,8,8,8,6,6,6,5,5,5,4,4,6,6,3,3,3,5,5,5,6,6,6,7,7,7,0,4,4,4,6,6,3,3,8,8,8,6,6,5,5,7,7,7,4,4,8,8,8,7,7,7,5,5,5,8,8,8,6,6,4,4,4,7,7,7,8,8,8,5,5,5,7,7,7,4,4,6,6,6,7,7,7,4,4,6,6,6,5,5,3,3,3,8,8,8,6,6,6,5,5,8,8,8,4,4,5,5,5,8,8,8,6,6,5,5,8,8,8,7,7,7,6,6,6,8,8,8,4,4,6,6,3,3,8,8,8,6,6,6]`
-
-### 3. FlowersNET & FlowersChristmasNET
-
-**Reel 1:** `[6,10,11,17,9,16,11,9,10,11,9,15,7,9,10,11,10,13,9,7,9,14,11,17,11,5,8,9,11,3,9,3,4,9,11,8,1,10,9,11,16,8,9,11,10,9,11,8,3,11,5,9,6,11,9,15,11,7,11,9,9,0,6,11,8,9,11,10,4,14,8,9]`
-
-**Note:** Use these same values for both games.
 
 ## 4. 🚨 MANDATORY VERIFICATION PHASE
 
@@ -156,3 +135,44 @@ Snippet: previous.rs.i0=basic&rs.i0.r.i1.pos=15&gameServerVersion=1.5.0&g4mode=f
 
 ==================================================
 🏁 TEST SEQUENCE COMPLETE
+
+
+Paste the text below at the very bottom of the file.
+```
+
+
+## 5. 📂 MASTER REEL STRIP DATA (JSON)
+⚠️ CRITICAL: If you cannot find reels.txt in the game folder, DO NOT INVENT DATA. Search for your [GameName] in the JSON block below. If found, copy the values from reel_strips and hardcode them into your SlotSettings.ts constructor (e.g., this.reelStrip1 = [...]).
+
+  {
+    "name": "GrandSpinnSuperpotNET",
+    "reel_strips": {
+      "reelStrip1": [
+        3, 3, 3, 50, 5, 5, 5, 99, 3, 3, 3, 50, 4, 4, 4, 100, 5, 5, 5, 101, 6, 6,
+        6, 50, 7, 7, 7, 102, 8, 8, 8, 50
+      ],
+      "reelStrip2": [
+        3, 3, 3, 50, 5, 5, 5, 99, 3, 3, 3, 50, 4, 4, 4, 100, 5, 5, 5, 101, 6, 6,
+        6, 50, 7, 7, 7, 102, 8, 8, 8, 50
+      ],
+      "reelStrip3": [
+        3, 3, 3, 50, 5, 5, 5, 99, 3, 3, 3, 50, 4, 4, 4, 100, 5, 5, 5, 101, 6, 6,
+        6, 50, 7, 7, 7, 102, 8, 8, 8, 50
+      ],
+      "reelStrip4": [
+        3, 3, 3, 50, 5, 5, 5, 99, 3, 3, 3, 50, 4, 4, 4, 100, 5, 5, 5, 101, 6, 6,
+        6, 50, 7, 7, 7, 102, 8, 8, 8, 50
+      ],
+      "reelStrip5": [
+        3, 3, 3, 50, 5, 5, 5, 99, 3, 3, 3, 50, 4, 4, 4, 100, 5, 5, 5, 101, 6, 6,
+        6, 50, 7, 7, 7, 102, 8, 8, 8, 50
+      ],
+      "reelStrip6": [],
+      "reelStripBonus1": [],
+      "reelStripBonus2": [],
+      "reelStripBonus3": [],
+      "reelStripBonus4": [],
+      "reelStripBonus5": [],
+      "reelStripBonus6": []
+    }
+  },
