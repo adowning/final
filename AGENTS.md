@@ -1,73 +1,79 @@
-# 🤖 Master Agent Instructions: PHP to TypeScript Slot Conversion
+# Agent Rules Standard (AGENTS.md)
 
-## PROJECT STATUS: 🔴 HIGH RISK. DEVIATION CAUSES CLIENT FAILURE.
+## CRITICAL INSTRUCTIONS: PHP to TypeScript Slot Migration
 
-## ROLE: Forensic Code Translator
+**PROJECT STATUS:** 🔴 HIGH RISK. DEVIATION CAUSES CLIENT FAILURE.
 
-## OBJECTIVE: Convert legacy PHP slot games into the specific Node.js/TypeScript architecture found in the final/ folder.
+**ROLE:** Forensic Code Translator.
 
-## 📚 Resources
-
-**Source Code:** You will find the PHP source in final/Games/[GameName]/.
-
-**Logic:** Server.php
-
-**Data:** Helpers/*.php (Paytables, Lines, Reels)
-
-**Target Location:** Create new files in final/src/games/[GameName]/.
-
-**Reference Implementation:** final/src/games/CreatureFromTheBlackLagoonNET/. Use this as your Gold Standard for class structure and syntax.
-
-**Base Classes:** final/src/games/base/BaseSlotSettings.ts.
+**OBJECTIVE:** Convert legacy PHP slot games into the specific Node.js/TypeScript architecture found in the final/ folder.
 
 ## 🚫 ZERO TOLERANCE RULES (READ FIRST)
 
-### NO "HELPERS" IN TYPESCRIPT:
-You must reassemble the code. If PHP does `require_once 'Helpers/paytable.php'`, you must OPEN that file, COPY the data, and PASTE it into your TypeScript constructor. Do not create a Helpers folder in the TypeScript directory. Hardcode the data.
-
 ### STRING EXACTNESS IS MANDATORY:
-The legacy client parses raw URL-encoded strings (e.g., `&rs.i0.r.i0.syms=SYM1...`).
 
-- DO NOT convert this to JSON.
-- DO NOT fix "ugly" concatenation.
-- If PHP has `'text' . $var`, TS must have `` `text${var}` ``.
-- A missing & or = will break the game.
+- The legacy client parses raw URL-encoded strings (e.g., `&rs.i0.r.i0.syms=SYM1...`)
+- DO NOT convert this to JSON
+- DO NOT fix "ugly" concatenation
+- If PHP has `'text' . $var`, TS must have `` `text${var}` ``
+- A missing `&` or `=` will break the game
+
+### NO MOCKING / NO "MONKEY PATCHING":
+
+- NEVER insert fake data (e.g., `const reels = [1, 1, 1]`) just to make the code compile
+- NEVER simplify the spin logic to "just return a win"
+- You must port the exact mathematical logic from PHP
 
 ### MATHEMATICAL INTEGRITY:
-Do not mock logic. If PHP iterates 2000 times to find a win, you must iterate 2000 times.
 
-**Strict Types:** PHP is loose (`"10" * 1 = 10`). TS is strict. You must use `parseFloat()`, `parseInt()`, and `Math.floor()`/`Math.round()` to ensure numerical identity.
+- **Strict Types:** PHP is loose ("10" * 1 = 10). TS is strict.
+- You must use `parseFloat()`, `parseInt()`, and `Math.floor()/Math.round()` to ensure numerical identity.
 
-## 🛠️ Step-by-Step Implementation
+## 📚 Resources
 
-### A. SlotSettings.ts (The Configuration)
-⚠️ CRITICAL PATH WARNING: reels.txt is located at Games/[GameName]/reels.txt. It is NOT in the Helpers/ folder. Do not let the pattern of the other files fool you. You must look in the game's root directory for the reels.
-**Inheritance:** Extend BaseSlotSettings.
+- **Source Code:** `final/Games/[GameName]/`. Logic is in `Server.php`. Data is usually in `Helpers/`, but see exceptions below.
+- **Target Location:** `final/src/games/[GameName]/`
+- **Reference Implementation:** `final/src/games/CreatureFromTheBlackLagoonNET/`. Use this as your Gold Standard.
+- **Base Classes:** `final/src/games/base/BaseSlotSettings.ts`
 
-**Imports:**
-```typescript
-import BaseSlotSettings, { IGameSettings } from '../../base/BaseSlotSettings';
-import ModelFactory from '../../models/ModelFactory';
-```
+## 1. The "Slimmed Down" Extraction Strategy
+
+The source PHP files have extracted massive data blocks. You must manually fetch and re-integrate this data.
+
+### ⚠️ CRITICAL PATH WARNING: 
+
+Do not assume all files are in `Helpers/`. Use this lookup table:
+
+| Data Needed | Primary Source | Fallback / Specific Instruction | Target TS File |
+|-------------|----------------|----------------------------------|----------------|
+| Paytable | `Helpers/paytable.php` | **TRAP:** If `paytable.php` returns a string, IGNORE IT. Copy the array logic from the original PHP `SlotSettings.php` constructor. | `SlotSettings.ts` (Constructor) |
+| Reels | Game Root (`Games/[Game]/reels.txt`) | It is NOT in `Helpers/`. If missing, check "Known Anomalies" below. | `SlotSettings.ts` (Constructor) |
+| Lines | `Helpers/lines.php` | If missing, copy `$linesId` array from PHP `Server.php`. | `Server.ts` (spin logic) |
+| CWins | `Helpers/cwins.php` | If missing, copy `$cWins` logic from PHP `Server.php`. | `Server.ts` (spin logic) |
+| Responses | `Helpers/*_response.php` | If missing, extract the string construction logic directly from PHP `Server.php` (init or spin case). | `Server.ts` (get method) |
+
+## 2. Implementation Guide
+
+### A. SlotSettings.ts (Configuration)
+
+**Inheritance:** Extend `BaseSlotSettings`.
 
 **Constructor:**
-- Call `super(settings)`.
-- Game Instance: `this.game = ModelFactory.createGame(settings.game);`
-- Paytable: Open `Helpers/paytable.php`. Copy the array logic into `this.Paytable`.
-- Reels: Open `Helpers/reels.txt`. Copy the CSV numbers into `this.reelStrip1`, etc.
-- Config: Port `SymbolGame`, `slotBonusType`, etc. exactly.
+- Call `super(settings)`
+- Game Instance: `this.game = ModelFactory.createGame(settings.game)`
+- Paytable: Populate `this.Paytable` array
+- Reels: Hardcode `reelStrip1`, `reelStrip2`, etc. Do not write file-reading logic
+- Config: Port `SymbolGame`, `slotBonusType`, `slotGamble` etc. exactly
 
 ### B. Server.ts (The Logic)
 
 **Structure:** Keep the `switch(postData['action'])` structure.
 
 **Data Re-integration:**
- - Helpers/paytable.php	COPY the array. PASTE into constructor.	SlotSettings.ts
- - Helpers/lines.php	COPY the array. PASTE into spin logic.	Server.ts
- - Helpers/cwins.php	COPY the logic (usually array fill).	Server.ts
- - Helpers/*_response.php	COPY the string. CONVERT vars to ${var}.	Server.ts
- - Helpers/freestate.php	COPY the state logic. CONVERT vars to ${var}.	Server.ts
-reels.txt (IN ROOT)	STOP! Look in the Game Root, not Helpers. COPY CSVs.	SlotSettings.ts
+- `Helpers/lines.php` → Copy array to `const linesId`
+- `Helpers/cwins.php` → Copy logic (usually `fill(0)`)
+- `Helpers/*_response.php` → Copy the massive string. Convert `$var` to `${var}`
+
 **Response:** Return the JSON object exactly as follows:
 
 ```typescript
@@ -77,29 +83,49 @@ return JSON.stringify({
 });
 ```
 
-## 🧪 Mandatory Verification
+## 3. ⚠️ Known Anomalies & Missing Data
 
-You must verify your code runs before submitting.
+If you are converting these specific games, use the data below instead of searching for files.
 
-**Run the Test Runner:**
+### 1. DazzleMeNET
+
+**Reels:** 5 reels with unique row counts (3-3-4-4-5).
+
+**Reel 1:** `[8,8,8,6,6,6,3,3,8,8,8,5,5,7,7,7,8,8,8,0,4,4,5,5,8,8,8,6,6,6,5,5,5,7,7,7,8,8,8,5,5,3,3,4,4,8,8,8,7,7,7,6,6,8,8,8,7,7,7,5,5,8,8,8,6,6,6,7,7,7,8,8,8,5,5,4,4,8,8,8,6,6,6,7,7,7,8,8,8,6,6,6,5,5,5,4,4,6,6,3,3,3,5,5,5,6,6,6,7,7,7,0,4,4,4,6,6,3,3,8,8,8,6,6,5,5,7,7,7,4,4,8,8,8,7,7,7,5,5,5,8,8,8,6,6,4,4,4,7,7,7,8,8,8,5,5,5,7,7,7,4,4,6,6,6,7,7,7,4,4,6,6,6,5,5,3,3,3,8,8,8,6,6,6,5,5,8,8,8,4,4,5,5,5,8,8,8,6,6,5,5,8,8,8,7,7,7,6,6,6,8,8,8,4,4,6,6,3,3,8,8,8,6,6,6]`
+
+**Note:** See provided reels.txt context for Reels 2-5 if needed.
+
+### 2. FortuneRangersNET
+
+**Reel 1:** `[8,8,8,6,6,6,3,3,8,8,8,5,5,7,7,7,8,8,8,0,4,4,5,5,8,8,8,6,6,6,5,5,5,7,7,7,8,8,8,5,5,3,3,4,4,8,8,8,7,7,7,6,6,8,8,8,7,7,7,5,5,8,8,8,6,6,6,7,7,7,8,8,8,5,5,4,4,8,8,8,6,6,6,7,7,7,8,8,8,6,6,6,5,5,5,4,4,6,6,3,3,3,5,5,5,6,6,6,7,7,7,0,4,4,4,6,6,3,3,8,8,8,6,6,5,5,7,7,7,4,4,8,8,8,7,7,7,5,5,5,8,8,8,6,6,4,4,4,7,7,7,8,8,8,5,5,5,7,7,7,4,4,6,6,6,7,7,7,4,4,6,6,6,5,5,3,3,3,8,8,8,6,6,6,5,5,8,8,8,4,4,5,5,5,8,8,8,6,6,5,5,8,8,8,7,7,7,6,6,6,8,8,8,4,4,6,6,3,3,8,8,8,6,6,6]`
+
+### 3. FlowersNET & FlowersChristmasNET
+
+**Reel 1:** `[6,10,11,17,9,16,11,9,10,11,9,15,7,9,10,11,10,13,9,7,9,14,11,17,11,5,8,9,11,3,9,3,4,9,11,8,1,10,9,11,16,8,9,11,10,9,11,8,3,11,5,9,6,11,9,15,11,7,11,9,9,0,6,11,8,9,11,10,4,14,8,9]`
+
+**Note:** Use these same values for both games.
+
+## 4. 🚨 MANDATORY VERIFICATION PHASE
+
+Do not submit your code until you have passed this test.
+
+### Run the Test Runner:
 
 ```bash
 bun final/src/index.ts [GameName] > for_review.txt
 ```
 
-(Replace `[GameName]` with the folder name you are working on, e.g., VikingsNET)
+*(Replace `[GameName]` with the folder name you are working on, e.g., `VikingsNET`)*
 
-**Compare with Reference Log:**
+### Compare with Reference Log:
 
-Check `for_review.txt`. It MUST match the structure of the Passing Example Log below.
+Check `for_review.txt`. It MUST match the structure of the Target Output below.
 
-- ✅ PASS must appear for init, paytable, and spin.
-- Snippet must show a long URL-encoded string (not empty, not JSON).
-- State object must be present.
+✅ **PASS** must appear for init, paytable, and spin.
+
+**Snippet** must show a long URL-encoded string (not empty, not JSON).
 
 ## 📜 Reference Log (Target Output)
-
-Your output should look almost identical to this:
 
 ```
 ✅ SlotSettings instantiated.
