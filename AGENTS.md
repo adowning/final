@@ -41,7 +41,7 @@ Do not mock logic. If PHP iterates 2000 times to find a win, you must iterate 20
 ## 🛠️ Step-by-Step Implementation
 
 ### A. SlotSettings.ts (The Configuration)
-
+⚠️ CRITICAL PATH WARNING: reels.txt is located at Games/[GameName]/reels.txt. It is NOT in the Helpers/ folder. Do not let the pattern of the other files fool you. You must look in the game's root directory for the reels.
 **Inheritance:** Extend BaseSlotSettings.
 
 **Imports:**
@@ -62,10 +62,12 @@ import ModelFactory from '../../models/ModelFactory';
 **Structure:** Keep the `switch(postData['action'])` structure.
 
 **Data Re-integration:**
-- `Helpers/lines.php` → Copy array to `const linesId` inside spin.
-- `Helpers/cwins.php` → Copy logic (usually `fill(0)`) to spin.
-- `Helpers/*_response.php` → Copy the massive string. Convert `$var` to `${var}`.
-
+ - Helpers/paytable.php	COPY the array. PASTE into constructor.	SlotSettings.ts
+ - Helpers/lines.php	COPY the array. PASTE into spin logic.	Server.ts
+ - Helpers/cwins.php	COPY the logic (usually array fill).	Server.ts
+ - Helpers/*_response.php	COPY the string. CONVERT vars to ${var}.	Server.ts
+ - Helpers/freestate.php	COPY the state logic. CONVERT vars to ${var}.	Server.ts
+reels.txt (IN ROOT)	STOP! Look in the Game Root, not Helpers. COPY CSVs.	SlotSettings.ts
 **Response:** Return the JSON object exactly as follows:
 
 ```typescript
